@@ -241,7 +241,6 @@ class ReversibleUniqueId
 		$number += $this->_offset;
 
 		$uId = '';
-
 		do
 		{
 			$mod = $number % $this->_base;
@@ -250,10 +249,6 @@ class ReversibleUniqueId
 			$number = $charASCII;
 		} while ($charASCII > 0);
 
-		if ($charASCII > 0)
-		{
-			$uId .= chr($this->_dictionary[$mod]);
-		}
 		return strrev($uId);
 	}
 
@@ -272,8 +267,7 @@ class ReversibleUniqueId
 			$position--;
 			$number += pow($this->_base, $position) * $this->_reverseDictionary[ord($char)];
 		}
-		$number = $number - $this->_offset;
-		return $number;
+		return ($number - $this->_offset);
 	}
 
 	/**
