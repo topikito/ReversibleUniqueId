@@ -46,6 +46,7 @@ class ReversibleUniqueId
 	 * @var array
 	 */
 	private $_dictionary = array();
+	private $_reverseDictionary = array();
 
 	/**
 	 * Size of the dictionary
@@ -177,6 +178,7 @@ class ReversibleUniqueId
 				$counter++;
 			}
 			$this->_dictionary = $tempDictionary;
+			$this->_reverseDictionary = array_flip($tempDictionary);
 		}
 
 		return true;
@@ -267,7 +269,7 @@ class ReversibleUniqueId
 		foreach ($chars as $char)
 		{
 			$position--;
-			$number += pow($this->_base, $position) * array_search(ord($char), $this->_dictionary);
+			$number += pow($this->_base, $position) * $this->_reverseDictionary[ord($char)];
 		}
 		$number = $number - $this->_offset;
 		return $number;
