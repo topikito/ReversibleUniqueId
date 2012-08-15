@@ -178,8 +178,9 @@ class ReversibleUniqueId
 				$counter++;
 			}
 			$this->_dictionary = $tempDictionary;
-			$this->_reverseDictionary = array_flip($tempDictionary);
 		}
+
+		$this->_reverseDictionary = array_flip($this->_dictionary);
 
 		return true;
 	}
