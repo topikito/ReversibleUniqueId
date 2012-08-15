@@ -4,10 +4,10 @@ class ReversibleUniqueId
 {
 
 	const ASCII_CHAR_FIRST	= 48;
-	const ASCII_CHAR_LAST	= 126;
-	const SHUFFLE_FACTOR	= 16;
+	const ASCII_CHAR_LAST	= 122;
+	const SHUFFLE_FACTOR	= 23;
 
-	private $_level = 0; //0: exclude reserved; 1: exclude reserved and unsafe
+	private $_level = 1; //0: exclude reserved + Add soft and hard. Base 91; 1: exclude reserved and unsafe + add soft. Base 64
 
 	private $_dictionary = array();
 
@@ -16,25 +16,24 @@ class ReversibleUniqueId
 	private $_offset = 0;
 
 	private $_reservedChars = array(
+		35 => 1, //Hash 			-- Not included by default
+		37 => 1, //Percent  		-- Not included by default
+		47 => 1, //Slash 			-- Not included by default
+		63 => 1  //Question mark
+	);
+
+	private $_unsafeChars = array(
 		58 => 1,
 		59 => 1,
 		60 => 1,
 		61 => 1,
 		62 => 1,
-		63 => 1,
-		64 => 1
-	);
-
-	private $_unsafeChars = array(
+		64 => 1,
 		91 => 1,
 		92 => 1,
 		93 => 1,
 		94 => 1,
-		96 => 1,
-		123 => 1,
-		124 => 1,
-		125 => 1,
-		126 => 1
+		96 => 1
 	);
 
 	private $_softAdditionalChars = array(
@@ -51,17 +50,14 @@ class ReversibleUniqueId
 		41 => 1,
 		42 => 1,
 		43 => 1,
+		44 => 1,
 		45 => 1,
-		46 => 1
+		46 => 1,
+		123 => 1,
+		124 => 1,
+		125 => 1,
+		126 => 1
 	);
-
-	private function _printDictionary()
-	{
-		foreach ($this->_dictionary as $charId)
-		{
-			echo 'CHAR[' . $charId . ']: ' . chr($charId) . "\n";
-		}
-	}
 
 	private function _generateDictionary()
 	{
@@ -115,20 +111,39 @@ class ReversibleUniqueId
 			}
 			$this->_dictionary = $tempDictionary;
 		}
-		$this->_offset = $this->_base - 1; //This forces to have minimum a length of two.
 
 		return true;
 	}
 
 	public function calculateOffsetForMinimumDigits($digits)
 	{
+		$digits--;
 		while ($digits > 0)
 		{
-			$digits--;
 			$minimumNumber += pow($this->_base, $digits);
+			$digits--;
 		}
 
-		return $minimumNumber;
+		return $minimumNumber - 1;
+	}
+
+	public function setMinimumDigits($digits)
+	{
+		$this->_offset = $this->calculateOffsetForMinimumDigits($digits);
+		return $this;
+	}
+
+	public function printDictionary($charOrdered = false)
+	{
+		$copy = $this->_dictionary;
+		if ($charOrdered)
+		{
+			asort($copy);
+		}
+		foreach ($copy as $number => $charId)
+		{
+			echo 'NUMBER ' . $number . ' => CHAR[' . $charId . ']: ' . chr($charId) . "\n";
+		}
 	}
 
 	public function encode($number)
@@ -169,15 +184,6 @@ class ReversibleUniqueId
 	public function __construct()
 	{
 		$this->_generateDictionary();
+		$this->setMinimumDigits(2);
 	}
-
 }
-
-$base = new ReversibleUniqueId();
-$uid = $base->encode(12000011);
-var_dump($uid);die;
-for ($i = 1; $i < 100; $i++)
-{
-	echo "\n" ;
-}
-$uid = $base->encode(1);
