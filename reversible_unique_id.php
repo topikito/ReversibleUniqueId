@@ -1,20 +1,70 @@
 <?php
-
+/**
+ * Reversible Unique ID Class
+ *
+ * @license http://www.freebsd.org/copyright/freebsd-license.html FreeBSD Licence
+ * @author roberto@nygaard.es - Roberto Nygaard - @topikito - github.com/topikito
+ * @version 0.1 - Experimental
+ *
+ * @example
+ *	$RUId = new ReversibleUniqueId();
+ *  $encoded = $RUId->encode(<number>);
+ *  $decoded = $RUId->decode(<encoded string>);
+ */
 class ReversibleUniqueId
 {
+	/**
+	 * ASCII limits
+	 */
+	const ASCII_CHAR_FIRST	= 48;	//First safe ASCII character: 0
+	const ASCII_CHAR_LAST	= 122;	//Last safe ASCII character: z
 
-	const ASCII_CHAR_FIRST	= 48;
-	const ASCII_CHAR_LAST	= 122;
+	/**
+	 * For preventing secuential order in the UId strings, we have
+	 * the option to shuffle the dictionary. Works if higher than 1
+	 */
 	const SHUFFLE_FACTOR	= 23;
 
-	private $_level = 1; //0: exclude reserved + Add soft and hard. Base 91; 1: exclude reserved and unsafe + add soft. Base 64
+	/**
+	 * Specifies the level of the generated string.
+	 *	0:	This creates a string with all the 'accepted' chars that an
+	 *		URL can read. It only exclude reserved chars and it adds
+	 *		what I call "soft" chars and "hard" ones. This generates
+	 *		a dictionary with 91 elements: Base 91.
+	 *
+	 *	1:	This creates a string with all the safe chars that an URL
+	 *		accepts. It excludes reserved and unsafe characters and adds
+	 *		"soft" characteres to the dictionary. This mode generates
+	 *		a Base 64 dictionary.
+	 *
+	 * @var int
+	 */
+	private $_level = 1;
 
+	/**
+	 * The array where we will store the dictionary in order to encode/decode
+	 * @var array
+	 */
 	private $_dictionary = array();
 
+	/**
+	 * Size of the dictionary
+	 * @var int
+	 */
 	private $_base = 0;
 
+	/**
+	 * Margin to start from if we don't wan't to begin with the first entry.
+	 * Useful if we want to generate a UId string with minimum 2 chars.
+	 * @var int
+	 */
 	private $_offset = 0;
 
+	/**
+	 * Chars that cannot be read correctly by a browser because they are
+	 * reserved and have their own behaviour.
+	 * @var array
+	 */
 	private $_reservedChars = array(
 		35 => 1, //Hash 			-- Not included by default
 		37 => 1, //Percent  		-- Not included by default
@@ -22,6 +72,11 @@ class ReversibleUniqueId
 		63 => 1  //Question mark
 	);
 
+	/**
+	 * Chars that may not be safe because they may need a conversion to
+	 * html entity.
+	 * @var array
+	 */
 	private $_unsafeChars = array(
 		58 => 1,
 		59 => 1,
@@ -36,10 +91,18 @@ class ReversibleUniqueId
 		96 => 1
 	);
 
+	/**
+	 * Safe chars that are allowed but not in the alfa-numeric group.
+	 * @var array
+	 */
 	private $_softAdditionalChars = array(
 		45 => 1
 	);
 
+	/**
+	 * Chars that may not be safe and are not included in the alfa-numeric group.
+	 * @var array
+	 */
 	private $_hardAdditionalChars = array(
 		33 => 1,
 		34 => 1,
@@ -59,6 +122,10 @@ class ReversibleUniqueId
 		126 => 1
 	);
 
+	/**
+	 * Builds the dictionary.
+	 * @return boolean
+	 */
 	private function _generateDictionary()
 	{
 		$this->_base = 0;
@@ -115,8 +182,14 @@ class ReversibleUniqueId
 		return true;
 	}
 
+	/**
+	 * Returns the minimum number to generate a $digits size string
+	 * @param int $digits
+	 * @return int
+	 */
 	public function calculateOffsetForMinimumDigits($digits)
 	{
+		$minimumNumber = 0;
 		$digits--;
 		while ($digits > 0)
 		{
@@ -127,12 +200,21 @@ class ReversibleUniqueId
 		return $minimumNumber - 1;
 	}
 
+	/**
+	 * Sets the offset so the minimum size of the UId equals $digits
+	 * @param int $digits
+	 * @return \ReversibleUniqueId
+	 */
 	public function setMinimumDigits($digits)
 	{
 		$this->_offset = $this->calculateOffsetForMinimumDigits($digits);
 		return $this;
 	}
 
+	/**
+	 * Shows the dictionary
+	 * @param bool $charOrdered
+	 */
 	public function printDictionary($charOrdered = false)
 	{
 		$copy = $this->_dictionary;
@@ -146,6 +228,11 @@ class ReversibleUniqueId
 		}
 	}
 
+	/**
+	 * Returns the UId for the $number given.
+	 * @param int $number
+	 * @return string
+	 */
 	public function encode($number)
 	{
 		$number += $this->_offset;
@@ -167,6 +254,11 @@ class ReversibleUniqueId
 		return strrev($uId);
 	}
 
+	/**
+	 * Returns the number corresponding to the $uId string
+	 * @param string $uId
+	 * @return int
+	 */
 	public function decode($uId)
 	{
 		$position = strlen($uId);
@@ -181,6 +273,9 @@ class ReversibleUniqueId
 		return $number;
 	}
 
+	/**
+	 * Magic Method constructor
+	 */
 	public function __construct()
 	{
 		$this->_generateDictionary();
