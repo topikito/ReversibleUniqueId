@@ -39,7 +39,7 @@ class ReversibleUniqueId
 	 *
 	 * @var int
 	 */
-	private $_level = 1;
+	private $_level = 0;
 
 	/**
 	 * The array where we will store the dictionary in order to encode/decode
@@ -67,10 +67,11 @@ class ReversibleUniqueId
 	 * @var array
 	 */
 	private $_reservedChars = array(
-		35 => 1, //Hash 			-- Not included by default
-		37 => 1, //Percent  		-- Not included by default
-		47 => 1, //Slash 			-- Not included by default
-		63 => 1  //Question mark
+		35 => 1,	//Hash 			-- Not included by default
+		37 => 1,	//Percent  		-- Not included by default
+		47 => 1,	//Slash 			-- Not included by default
+		63 => 1,	//Question mark
+		92 => 1		//Inverted slash
 	);
 
 	/**
