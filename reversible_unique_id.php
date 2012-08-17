@@ -30,7 +30,7 @@ class ReversibleUniqueId
 	 *	0:	This creates a string with all the 'accepted' chars that an
 	 *		URL can read. It only exclude reserved chars and it adds
 	 *		what I call "soft" chars and "hard" ones. This generates
-	 *		a dictionary with 91 elements: Base 91.
+	 *		a dictionary with 90 elements: Base 90.
 	 *
 	 *	1:	This creates a string with all the safe chars that an URL
 	 *		accepts. It excludes reserved and unsafe characters and adds
